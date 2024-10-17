@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Serialize,Deserialize};
 use diesel::prelude::*;
 use crate::schema::posts;
 
@@ -28,3 +28,7 @@ pub struct NewPost{
  pub filepath:String 
 }
 
+#[derive(Deserialize)]
+pub struct OnePost{
+   pub   id:i32,
+}

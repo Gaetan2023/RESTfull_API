@@ -24,7 +24,7 @@ fn setup_database() -> DdPool{
     pool
                         }
 
-//get_data()  receive data form database and sent it to client
+//get_datas()  receive data form database and sent it to client
 async fn get_data(pool:web::Data<DdPool>) -> Result<HttpResponse,Error>
 {
     let mut connection = pool.get().expect("Fail to have connection from pool");
@@ -68,12 +68,33 @@ async fn post_data(pool:web::Data<DdPool>,
                                                               .map_err(error::ErrorInternalServerError)?;
                                  Ok(HttpResponse::Created().finish())
 }
+// get_one_post() get single post from database
+
+
+     async fn get_one_post(pool:web::Data<DdPool>,
+                           post_id:web::Path<OnePost>) -> Result<HttpResponse,Error> {
+         
+         let mut connection= pool.get().expect("Can't get db connected from pool");
+         let post_out= web::block( move  ||{
+                              posts.filter(id.eq(post_id.id))
+                                   .first::<Post>(&mut connection)
+
+                                   })
+                                     .await?.map_err(error::ErrorInternalServerError)?;
+                               Ok(HttpResponse::Ok().json(post_out))
+     }
+
+
+
+
+
 // configuration of App under scope api
  fn api_config(cfg: &mut web::ServiceConfig) -> (){
      cfg.service(
          web::scope("/api")
          .route("/data",web::get().to(get_data))
          .route("/add_data",web::post().to(post_data))
+         .route("/data/post/{id}",web::get().to(get_one_post))
 );
  }
 
